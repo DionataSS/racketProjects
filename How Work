@@ -1,0 +1,6 @@
+The code serves to represent the pieces of the Snooker game, you can use the following commands:
+
+(DESENHA-BOLAS MAIORES)
+(DESENHA-BOLAS MENORES)
+BOLA8 
+BOLA-BRANCA
