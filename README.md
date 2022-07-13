@@ -1,11 +1,11 @@
 # racketProjects
-Many codes in .racket I developed in university
+some codes and assessments I developed at university
 
-Link First Test:
+link First Test:
 https://www.wescheme.org/view?publicId=nzpe255uhW
 
-Link Second Test:
+link Second Test:
 https://www.wescheme.org/view?publicId=EdGAPXF9yw
 
-Link Final Test:
+link Final Test:
 https://www.wescheme.org/view?publicId=dZdM28dhqT
