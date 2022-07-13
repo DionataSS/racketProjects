@@ -1,0 +1,618 @@
+;;                               PARTE 1
+;; ========================================================================
+
+;;
+;;                        DEFINIÇÕES DE DADOS
+;; ======================================================================== 
+;; CONSTANTES:
+
+(define PULA_VEZ -1)
+(define COMPRA2 -2)
+(define INVERTE -3)
+(define CURINGA -5)
+(define CURINGA_COMPRA4 -4)
+
+;; -----------------
+;; TIPO CARTA:
+;; -----------------
+;; Um elemento do conjunto Carta é
+;;   (list c v)     onde
+;;   c : String, é a cor da carta, que pode ser "azul", "verde", "amarelo", "vermelho" ou "preto" ou "livre"
+;;   v : Número, é o valor da carta, que pode ser qualquer inteiro entre 0 e 9,
+;;               ou um número negativo -1 (PulaVez), -2 (Compra2), -3 (Inverte),-4 (Compra4) ou -5 (Curinga)
+
+;; ========================================================================
+;;                        FUNÇÕES (use se quiser)
+;; ======================================================================== 
+;; cor-da-carta: Carta -> String
+;; Dada uma carta, devolve sua cor.
+;; Exemplo:  (cor-da-carta (list "vermelho" 1)) = "vermelho"
+(define (cor-da-carta c) (first c))
+
+;; numero-da-carta: Carta -> Número
+;; Dada uma carta, devolveseu número.
+;; Exemplo:  (numero-da-carta (list "vermelho" 1)) = 1
+(define (numero-da-carta c) (first (rest c)))
+
+;; desenha-carta : Carta -> Imagem
+;; Gera uma imagem para cada carta UNO.
+(define (desenha-carta carta)
+  (overlay ;; sobrepor:
+              ;; texto da carta:
+              (desenha-texto (numero-da-carta carta))
+              ;; círculo branco:
+              (circle 45 "solid" "white")
+              ;; retângulo da cor da carta:
+              (rectangle 100 150 "solid" (cor carta))
+              ;; contorno preto:
+              (rectangle 110 160 "outline" "black")))
+
+;; desenha-texto: Número -> String
+;; Dado o número correspondente a uma carta de UNO, gera
+;; uma string para ser desenhada na carta.
+(define (desenha-texto valor)
+  (text (cond ;; escolher o símbolo a ser desenhado, dependendo do valor:
+               [(= valor CURINGA_COMPRA4) "+4"]
+               [(= valor COMPRA2)         "+2"]
+               [(= valor INVERTE)         "«"]
+               [(= valor PULA_VEZ)        "Ø"]
+               [(= valor CURINGA)         "T"]
+               [else (number->string valor)])
+        ;; o texto será desenhado em tamanho 70 em preto
+        70 "black"))
+
+;; cor : Carta -> String
+;; Objetivo: a função recebe uma carta UNO, e retorna a respectiva cor
+;; em ingles, ou seja, "blue", "green", "yellow", "red" ou "black".
+;; Exemplos:
+;; (cor? "azul") = "blue"
+;; (cor? "verde") = "green"
+;; (cor? "beje") = "black"
+(define (cor c)
+  (cond
+    [(string=? "azul" (cor-da-carta c)) "blue"]
+    [(string=? "verde" (cor-da-carta c)) "green"]
+    [(string=? "vermelho" (cor-da-carta c)) "red"]
+    [(string=? "amarelo" (cor-da-carta c)) "yellow"]
+    [else "black"]))
+
+;; jogada-válida? : Carta Carta -> Booleano
+;; Objetivo: Dada uma carta da mao e uma da mesa, nesta ordem,
+;; verifica se é possível a carta da mão, de acordo com as regras do UNO
+;; Exemplos:
+;;    (jogada-válida? (list "azul" 3) (list "azul" 4))=  #t 
+;;    (jogada-válida? (list "azul" 3) (list "preto" CURINGA_COMPRA4)) = #t 
+;;    (jogada-válida? (list "azul" 3) (list "vermelho" 4)) = #f
+
+(define (jogada-válida? carta-mao carta-mesa)
+     (cond
+          ;; se a carta da mão for preta, a jogada é válida
+          [(string=? (cor-da-carta carta-mao) "preto") #t]
+          ;; se a carta da mesa for preta, a jogada é válida
+          [(string=? (cor-da-carta carta-mesa) "preto") #t] 
+          ;; se as duas cartas forem da mesma cor ou do mesmo tipo/valor, a jogada é válida
+          [(or (string=? (cor-da-carta carta-mesa)(cor-da-carta carta-mao))
+               (= (numero-da-carta carta-mesa) (numero-da-carta carta-mao))) #t]
+          ;; senão, a jogada é inválida
+          [else #f] )) 
+
+
+;; ========================================================================
+;;                       QUESTÃO 1
+;; =========================================================================
+
+;; --------------------
+;; TIPO LISTA DE CARTAS:
+;; --------------------
+;; Uma ListaDeCartas pode ser:
+;; 1.Vazia (empty),ou
+;; 2.(list c l), onde
+;; c: Carta é a carta da lista, sendo numeros de 0 a 9, as cartas PulaVez, Compra2, Inverte, Compra4 ou Curinga, nas cores "azul", "verde", "amarelo", "vermelho" ou "preto".
+;; ListaDeCartas é a lista de cartas do jogo uno oficial
+
+;; Constantes do tipo Carta:
+
+(define DOIS-VERDE (list "verde" 2))
+(define INVERTE-AZUL (list "azul" -3))
+(define COMPRA4 (list "preto" -4))
+(define COMPRA2-VERMELHO (list "vermelho" -2))
+(define SETE-VERDE (list "verde" 7))
+(define TRES-VERMELHO (list "vermelho" 3))
+(define QUATRO-AMARELO (list "amarelo" 4))
+(define NOVE-AZUL (list "azul" 9))
+
+;; Constantes do tipo ListaDeCartas: 
+
+(define LISTA1 (list DOIS-VERDE INVERTE-AZUL SETE-VERDE))
+(define LISTA2 (list COMPRA2-VERMELHO TRES-VERMELHO COMPRA2-VERMELHO))
+(define LISTA3 (list DOIS-VERDE INVERTE-AZUL COMPRA2-VERMELHO TRES-VERMELHO))
+(define LISTA4 (list TRES-VERMELHO NOVE-AZUL COMPRA4 NOVE-AZUL DOIS-VERDE))
+(define LISTA5 (list TRES-VERMELHO COMPRA4 SETE-VERDE DOIS-VERDE TRES-VERMELHO COMPRA4))
+(define LISTA6 (list SETE-VERDE DOIS-VERDE))
+(define LISTA0 (list))
+
+;; ========================================================================
+;;                                 QUESTÃO 2
+;; ========================================================================
+;; ==> desenha-cartas
+;; desenha-cartas: ListaDeCartas -> Imagem
+;; Obj: Dada uma lista de cartas, gera uma imagem com as cartas lado a lado.
+;; Exemplos:
+;; (desenha-cartas LISTA1) = desenha lado a lado as cartas DOIS-VERDE, INVERTE-AZUL, SETE-VERDE)
+
+(define (desenha-cartas lista)
+ (cond
+  [(empty? lista) empty-image] ;; se a lista estiver vazia, retorna uma imagem vazia
+   [else (beside  ;; senão, coloca a imagem lado a lado da primeira carta da lista com a imagem das cartas do resto
+          (desenha-carta (first lista))
+           (desenha-cartas (rest lista)))]))
+
+;; ========================================================================
+;;                                 QUESTÃO 3
+;; ========================================================================
+;; ==> número-opções
+;; número-opções: ListaDeCartas Carta -> Número
+;; Obj: dadas uma lista de cartas e uma carta da mesa, devolve as opções de cartas para jogar nesta lista.
+;; Exemplo:
+;;   (check-expect (número-opções LISTA1 DOIS-VERDE) 1)
+
+(define (número-opções lista carta)
+  (cond
+   [(empty? lista) 0] ;;se a lista estiver vazia, devolver zero
+   [(boolean=? (jogada-válida? (first lista) carta) true) ;;se a jogada é válida, soma um ao tamanho do resto.
+    (+ 1 (número-opções (rest lista) carta))]
+   [else ;;se não, verifica o número de opções no resto da lista
+     (número-opções (rest lista) carta)]))
+
+;;(número-opções LISTA1 NOVE-AZUL)
+;;(número-opções LISTA3 TRES-VERMELHO)
+;;(número-opções LISTA5 SETE-VERDE)
+
+;; ========================================================================
+;;                                 QUESTÃO 4
+;; ========================================================================
+;; ==> remove-repetidas
+;; remove-repetidas: ListaDeCartas -> ListaDeCartas
+;; Obj: Dada uma lista de cartas remove as cartas repetidas e devolve a lista, mantendo a última
+;;carta que for encontrada de cada tipo.
+;;Exemplos/Testes:
+  ;; (check-expect (remove-repetidas LISTA2) (list "azul" 1(list "vermelho" -2)))
+
+(define (remove-repetidas lc) ;; Dada uma lista de cartas lc
+         (cond
+          [(empty? lc) empty] ;; se a lista lc estiver vazia,devolver a lista vazia
+          ;; se a primeira carta da lista estiver no resto da lista, remover a carta do resto da lista
+          [(boolean=? (está-na-lista? (first lc) (rest lc)) true) (remove-repetidas (rest lc))]
+          ;; senão, construir uma pilha de cartas com a primeira carta de lc e as cartas do resto de lc
+          [else (list (first lc) (rest lc))]))
+
+;; (remove-repetidas LISTA2)
+
+
+;;     FUNÇÕES AUXILIARES
+
+;; ==> está-na-lista?
+;; está-na-lista?: Carta ListaDeCartas -> Booleano
+;; Obj: Dada uma carta e uma lista de cartas, verifica se a carta está na lista.
+;; Exemplos:
+  (check-expect (está-na-lista? DOIS-VERDE LISTA1) true) 
+  (check-expect (está-na-lista? NOVE-AZUL LISTA1) false)
+;; está-na-lista?: Carta ListaDeCartas -> Booleano
+;; Dada uma carta e uma lista de cartas, verifica se a carta está na lista.
+
+(define (está-na-lista? carta lista)
+  (cond 
+    [(empty? lista) false] ;; se a lista estiver vazia, informa que pe falso
+    [(cartas-iguais? (first lista) carta) true] ;; se a primeira carta da lista for igual a carta, informa verdadeiro
+    [else (está-na-lista? carta (rest lista))])) ;; se não, verifica no resto da lista.
+
+
+;; ==> cartas-iguais?
+;; cartas-iguais? : Carta Carta -> Booleano
+;; Dadas duas cartas, verifica se elas são iguais
+;; Exemplos:
+  (check-expect (cartas-iguais? (list "verde" 2) (list "verde" 2))true) 
+  (check-expect (cartas-iguais? (list "azul" 3) (list "amarelo" 3))false)
+
+  (define (cartas-iguais? carta1 carta2)
+           (cond
+            [(and (string=? (cor-da-carta carta1) (cor-da-carta carta2)) 
+             (= (numero-da-carta carta1) (numero-da-carta carta2))) true]
+            [else false]))
+
+;; ========================================================================
+;;                                 QUESTÃO 5
+;; ========================================================================
+;; Definição do tipo CartaOuString: um conjunto que contém todos as cartas e strings:
+;;
+;; Uma CartaOUString é
+;; 1. uma carta, ou
+;; 2. uma string
+;;
+;; ==> define-jogada
+;; define-jogada: ListaDeCartas carta -> CartaOuString
+;; Obj: Dadas uma lista de cartas e a carta da mesa, escolhe uma carta para jogar. 
+;; Sempre será selecionada a primeira carta válida.
+;; Exemplos:
+;; (define-jogada LISTA5 QUATRO-AMARELO) = retorna a carta (lista)
+
+(define (define-jogada lista carta)
+  (cond
+   [(empty? lista) "Impossível jogar carta"] ;; se não há na mão alguma carta que pode ser jogada, devolver "Impossível jogar carta"
+   [(boolean=? (jogada-válida? (first lista) carta) true) (first lista)] ;; se primeira carta da lista é uma jogada válida, devolve a carta
+   [else
+    (define-jogada (rest lista) carta)])) ;; se não, verifica no resto da lista
+    
+    ;; Lista2_Parte2_Dionata_Silva_da_Silveira
+
+;; ========================================================================
+;;                              PARTE 2
+;; =========================================================================
+;;
+;; TIPO FIGURA:
+;; Um elemento do conjunto Figura é
+;; (list x y a c), onde
+;; x: Número, é a coordenada x do centro da figura
+;; y: Número, é a coordenada y do centro da figura
+;; a : Número, é a altura da figura
+;; c : Número, número que representa a cor da figura, de acordo com a função gera-cor 
+
+;; =================================================
+;; FUNÇÕES PARA ACESSAR OS COMPONENTES DE UMA FIGURA:
+;; =================================================
+;; As funções a seguir são definidas como novos nomes para
+;; as funções sobre listas first, second, third e fourth.
+(define coord-x-figura first)
+(define coord-y-figura second)
+(define altura-figura third)
+(define cor-figura fourth)
+
+;; ========================
+;; FUNÇÃO GERA-COR:
+;; ========================
+;; gera-cor : Número -> String
+;; Obj.:Dado um número positivo, devolve uma de 5 cores: "red", "blue", "green", "yellow" ou "cyan".
+;; Exemplos:
+;;      (gera-cor 1) = "blue"
+;;      (gera-cor 55) = "red"
+(define (gera-cor n) ; define que gera cor dependerá de um número que representará a cor
+  (cond
+    [(= (remainder n 5) 0) "red"]
+    [(= (remainder n 5) 1) "blue"]  
+    [(= (remainder n 5) 2) "green"]
+    [(= (remainder n 5) 3) "yellow"]
+    [(= (remainder n 5) 4) "cyan"]))
+
+;; ========================
+;; FUNÇÃO DESENHA-TRIANGULO:
+;; ========================
+;; desenha-triangulo : Número String ->  Imagem
+;; Obj.: Dados um tamanho de lado e uma cor, desenha um triângulo.
+;; Exemplos:
+;;     (desenha-triangulo 20 "red") = ; desenha um triangulo de lado 20 vermelho
+;;     (desenha-triangulo 50 "darkgreen") = ; desenha um triangulo de lado 50 verde escuro
+(define (desenha-triangulo lado cor) ; define que desenha-triangulo dependerá de um número e um string
+  (triangle lado "outline" cor)) ; usará o lado e a cor e será contornado
+
+;; ==========================================================================
+;; 7: Função sierpinski
+;; ==========================================================================
+;; sierpinski: Número String -> Imagem
+;; Obj: Dados o tamanho do lado e uma cor, desenha um triângulo de Sierpinski da cor escolhida, onde o lado do triângulo externo é o lado passado como argumento.
+;; Exemplos:
+
+ (define (sierpinski lado cor) ; define que sierpinski dependerá de um número (lado) e um número (cor)
+  (cond
+   [(<= lado 5)  (desenha-triangulo lado cor)] ;; se o lado for pequeno, desenhar um triângulo com o lado dado
+   [else (local
+          ((define TRIANGULO (sierpinski (/ lado 2) cor))) ;; senão, desenha um triângulo de sierpinksi com a metade do tamanho do lado e monta a imagem do triângulo de sierpinski colocando um TRIANGULO acima outros dois TRIANGULOS
+            (above TRIANGULO ;; e define nome de TRIANGULO para este desenho:
+             (beside TRIANGULO TRIANGULO)))]))
+
+;; Argumentação de terminação:
+;; Este programa sempre termina porque:
+;; (a) Existe um caso base (sem recursão) que é quando o tamanho do lado é menor ou igual a 5.
+;;     Neste caso, o programa simplesmente desenha um triângulo com este lado.
+;; (b) Cada chamada recursiva é realizada tendo como argumento a metade do lado,
+;;     que é um número estritamente menor que o lado, e portanto mais próximo
+;;     de se tornar menor que 5 que o lado (lembrando que a chamada recursiva só ocorre se o lado for >=5).
+;; (c) As funções <=, above, beside e cond terminam, pois são pré-definidas da linguagem.
+;;     A função desenha-triangulo termina, pois somente usa funções pré-definidas e não tem laços.
+
+;;========================================================================
+(define (sierpinski-sem-def-local lado cor)
+  (cond
+       ;; se o lado for pequeno, desenhar um triângulo com o lado dado
+       [(<= lado 5)  (desenha-triangulo lado cor)]
+       ;; senão
+       [else
+        (above
+         (sierpinski-sem-def-local (/ lado 2) cor) ; desenha um triângulo de sierpinksi com a metade do tamanho do lado, e monta a imagem do triângulo de sierpinski colocando um triangulo
+         (beside  ; acima de dois outros dois triângulos de sierpinksi:
+          (sierpinski-sem-def-local (/ lado 2) cor)
+           (sierpinski-sem-def-local (/ lado 2) cor)))]))
+
+;;(sierpinski 400 "blue")
+;; ==========================================================================
+;; 8: Função sierpinski-carpet
+;; ==========================================================================
+;; sierpinski-carpet -> Numero String = Imagem
+;; Obj.: Dados um número que será o lado e uma string que será a cor, desenha um sierpinski-carpet de acordo com o lado e a cor
+;; Exemplo:
+;; (sierpinski-carpet 20 "blue") = desenha um sierpinski-carpet com 20 de lados azul
+
+(define (sierpinski-carpet lado cor)
+  (cond
+   [(<= lado 10)  (desenha-quadrado lado cor)] ;; se o lado for muito pequeno, desenhar um quadrado com o lado dado
+    [else (local
+           ((define Q-Color (sierpinski-carpet (/ lado 3) cor)) ;; senão, desenha um carpete de sierpinksi com um terço do tamanho do lado e dá o nome de Q-color para este desenho, e desenha outro carpete de sierpinksi com mesmo tamanho na cor branca
+            (define Q-Branco (square (/ lado 3) "solid" "white"))) ;; e dá o nome de Q-Branco
+             (above 
+              (beside Q-Color Q-Color Q-Color) ;; e monta a imagem do carpete de sierpinski colocando um Q-Color ao lado de outros dois Q-Color, e esses devem estar acima de um Q-Color ao lado de um Q-Branco ao lado de um Q-Color
+               (beside Q-Color Q-Branco Q-Color) ;; Q-Color ao lado de outros dois Q-Color
+                (beside Q-Color Q-Color Q-Color)))]))
+
+ 
+;; ========================
+;; FUNÇÃO DESENHA-QUADRADO:
+;; ========================
+;; desenha-quadrado : Número String ->  Imagem
+;; Obj.: Dados um tamanho de lado e uma cor, desenha um quadrado.
+;; Exemplos:
+;;     (desenha-triangulo 20 "red") = .
+;;     (desenha-triangulo 50 "darkgreen") = .
+
+(define (desenha-quadrado lado cor)
+  (square lado "outline" cor))
+
+;;(sierpinski-carpet 100 "blue")  
+
+;; ==========================================================================
+;; 9: Função desenha-sierpinski-carpet
+;; ==========================================================================
+;; desenha-sierpinski-carpet: Figura -> Imagem
+;; Obj.: Dada uma figura, desenha um  sierpinski carpet com os dados desta figura.
+
+(define (desenha-sierpinski-carpet figura)
+         (sierpinski-carpet (altura-figura figura) (gera-cor (cor-figura figura))))
+
+
+(define FIGURA1 (list 100 20 100 20))
+
+;; ==========================================================================
+;; 10: Função desenha-figuras
+;; ==========================================================================
+(define LARG 400)
+(define ALT 400)
+(define TRI1 (list 100 100 100 100))
+(define TRI2 (list 30 50 70 1))
+(define TAPETE (list 29 49 69 1))
+
+
+;; desenha-figuras:(Figura -> imagem) Figura -> Cena
+;;Obj: Dada uma função que desenha figuras e uma figura, gera uma cena com várias figuras, tendo a variação de pelo menos um dos seus atributos
+;;(cor, localização, altura).
+;;Exemplos:
+;;    (desenha-figuras TRI1)= desenha vários triângulos de sierpinski variando 5 em x, 10 em y e um na cor.
+
+(define (desenha-figuras fun f)
+    ;; Dadas uma função de desenhar figura, fun, e uma figura f
+  (cond
+    ;; se a imagem está fora dos limites, desenha a cena
+    [(or (>= (coord-x-figura f) 400) (>= (coord-y-figura f) 400)) (empty-scene 400 400)]
+    ;; senão monta uma cena com
+    [else (place-image
+           (fun f)  ;; o desenho da figura f na
+            (coord-x-figura f) ;; coordenada x da figura e
+             (coord-y-figura f) ;; coordenada y da figura em
+                   ;; uma cena contendo os desenhos das figuras a partir da figura movida
+                   ;; em 5 unidades no eixo x e 10 no y, e mudando para a próxima cor
+               (desenha-figuras fun (list
+                                     (+ 5 (coord-x-figura f))
+                                      (+ 10 (coord-y-figura f))
+                                       (altura-figura f)
+                                        (+ 1 (cor-figura f)))))]))
+                             
+
+;; ===================
+;; Função Auxiliar
+;; ===================
+;; desenha-sierpinski Figura -> Imagem
+;; Obj: Dada uma figura, desenha um  triânfulo de sierpinski com os dados desta figura.
+;; Exemplo: (desenha-sierpinski FIGURA1) = desenha um triângulo de sierpinski  de lado 100 na cor amarela.
+
+(define (desenha-sierpinski figura)
+   (sierpinski (altura-figura figura) (gera-cor (cor-figura figura))))
+
+
+; Aplicações de desenha-sierpinski:
+(desenha-figuras desenha-sierpinski TRI1)
+
+;; Argumentação de terminação:
+;; Este programa sempre termina porque:
+;; (a) Existe um caso base (sem recursão) que é quando a figura está fora dos limites da largura e altura da cena.
+;;     Neste caso, o programa simplesmente desenha a figura na cena.
+;; (b) Cada chamada recursiva é realizada tendo como argumento a adição de 5 unidades na coordenada x e 10 na cooedenada y,
+;;     e portanto ficando mais próximo dos limites da cena(lembrando que a chamada recursiva só ocorre se a figura está dentro dos limites da cena).
+;; (c) As funções =>, place-image e cond terminam, pois são pré-definidas da linguagem.
+;;     A função que desenha uma figura termina, pois somente usa funções pré-definidas e não tem laços.
+
+;; ==========================================================================
+;; 11: Função desenha-figuras-gen
+;; ==========================================================================
+
+;; (a) Critérios de fim e funções de movimentação:
+
+;;-----------------
+;; CRITÉRIO DE FIM
+;;-----------------
+;;1
+;;fora-de-cena? : Figura -> Boolean
+;;Obj: Dada uma figura, determina se ela está fora da cena.
+;;Exemplos/Testes:
+  (check-expect (fora-de-cena? (list 500 5 30 56)) true)
+  (check-expect (fora-de-cena? (list 10 50 43 3))false)
+
+(define (fora-de-cena? f)
+   ;; Dada uma-figura
+    ;; A figura está fora dos limites se 
+         (not ;; não está dentro dos limites:
+          (and ;; está entre a 0 e LARG e 0 e ALT
+           (<=  0 (coord-x-figura f) LARG)
+            (<=  0 (coord-y-figura f) ALT))))
+
+;;2
+;;Muito-pequena?: Figura -> Boolean
+;;Obj: Dada uma figura, verifica se seu tamanho é pequeno. Se menor ou igual a 5 é considerada pequena.
+;;Exemplos/Testes:
+ (check-expect (Muito-pequena? TRI1) false)
+ (check-expect (Muito-pequena? (list 100 100 3 20)) true)
+
+(define (Muito-pequena? f)
+    ;; Dada uma-figura
+      ;;verificar se a altura é menor ou igual a 5
+         (<= (altura-figura f) 5))
+
+;;3
+;;Cor>15?: Figura -> Boolean
+;;Obj: Dada uma figura, verifica o número que representa sua cor é maior que 15.
+;;Exemplos/Testes:
+  (check-expect (Cor>15? TRI1) true)
+  (check-expect (Cor>15? TAPETE) false)
+
+(define (Cor>15? f)
+  ;; Dada uma-figura
+      ;;verificar se a cor é maior que 10
+         (> (cor-figura f) 15))
+
+;;-----------------------
+;; FUNÇÔES DE MOVIMENTAÇÃO
+;;-----------------------
+
+;; Move-R: Figura -> Figura
+;; Obj: Dada uma figura, move esta figura para a direita, adicionando 3 unidades a coordenada x da figura
+;; Exemplos/Testes:
+  (check-expect (Move-R TRI1) (list 110 100 100 101))
+  (check-expect (Move-R TAPETE)(list 39 49 69 2))
+
+(define (Move-R f)
+         (list
+          (+ 10 (coord-x-figura f))
+           (coord-y-figura f)
+            (altura-figura f)
+             (+ 1 (cor-figura f))))
+
+
+;; Less-fig: Figura -> Figura
+;; Obj: Dada uma figura, diminui em 15 unidades a altura.
+;; Exemplos/Testes:
+ (check-expect (Less-fig TRI1)(list 150 120 85 101))
+ (check-expect (Less-fig TAPETE) (list 79 69 54 2))
+
+(define (Less-fig f)
+         (list
+          (+ 50 (coord-x-figura f))
+           (+ 20 (coord-y-figura f))
+            (- (altura-figura f) 15 )
+             (+ 1 (cor-figura f))))
+
+
+;; Change-cor: Figura -> Figura
+;; Obj: Dada uma figura, aumenta em 2 unidades o número que representa a cor.
+;; Exemplos:
+ (check-expect (Change-cor TRI2) (list 40 55 70 3))
+ (check-expect (Change-cor TAPETE) (list 39 54 69 3))
+
+(define (Change-cor f)
+         (list
+          (+ 10 (coord-x-figura f))
+           (+ 5 (coord-y-figura f))
+            (altura-figura f)
+             (+ 2 (cor-figura f))))
+
+
+;; Move-fig: Figura -> Figura
+;; Obj: Dada uma figura, move esta figura de acordo com as definições de seu deslocamento.
+;; Exemplos:
+   (check-expect (Move-fig TRI2) (list 50 110 70 4))
+   (check-expect (Move-fig TAPETE) (list 49 109 69 4))
+
+(define (Move-fig f)
+         (list
+          (+ 20 (coord-x-figura f))
+           (+ 60 (coord-y-figura f))
+            (altura-figura f)
+             (+ 3 (cor-figura f))))
+
+;; Função desenha-figuras-gen:
+;; desenha-figuras:(Figura -> imagem) Figura (Figura -> Figura) -> Cena
+;; Obj: Dadas uma função de desenhar figura, uma figura, um critério de fim e uma função de alteração de figuras, devolve
+;; uma cena com várias figuras, variando pelo menos um dos seus atributos (cor, localização, altura), conforme a função critério, até que chegue na função fim.
+;;Exemplos:
+;;  (desenha-figuras-gen desenha-sierpinski TRI2 Cor>15? Change-cor) = desenha  um triangulo de sierpinski do tamanho 39 de lado,
+;;   variando a cor em 2 unidades até que chegue na cor maior que 15.
+
+(define (desenha-figuras-gen fun f critério fun-alteração)  
+(cond
+    ;; se atende a função critério, desenha a cena
+    [(boolean=? (critério f) true)(empty-scene 400 400)]
+    ;; senão monta uma cena com
+    [else (place-image
+                   (fun f)  ;; o desenho da figura f na
+                    (coord-x-figura f) ;; coordenada x da figura e
+                     (coord-y-figura f) ;; coordenada y da figura em
+                   ;; uma cena contendo os desenhos das figuras a partir da função que altera a figura
+                      (desenha-figuras-gen fun (fun-alteração f) critério fun-alteração))]))
+
+;; Aplicações de desenha-figuras-gen:
+
+(desenha-figuras-gen desenha-sierpinski TRI2 Cor>15? Change-cor)
+(desenha-figuras-gen desenha-sierpinski TRI1 Muito-pequena? Less-fig)
+(desenha-figuras-gen desenha-sierpinski-carpet TAPETE fora-de-cena? Move-R)
+(desenha-figuras-gen desenha-sierpinski-carpet TAPETE fora-de-cena? Move-fig)
+
+;; (c) Argumentação sobre a terminação das chamadas:
+
+;; (desenha-figuras-gen desenha-sierpinski TRI2 Cor>15? Trocar-cor)
+;; Este programa sempre termina porque:
+;; (a) Existe um caso base (sem recursão) que é quando o número que representa a cor é maior que 15.
+;;     Neste caso, o programa simplesmente desenha a figura esta cor.
+;; (b) Cada chamada recursiva é realizada tendo como argumento a função Change-cor, que adiciona mais
+;;     2 unidades ao número da cor da figura, assim a cada chamada fica mais próximo chegar ao número
+;;    15 (lembrando que a chamada recursiva só ocorre se o número da cor for < 15).
+;; (c) As funções boolean=?, place-image e cond terminam, pois são pré-definidas da linguagem.
+;;     A função desenha-sierpinski termina, pois a função Change-cor termina e não tem laços.
+
+;;(desenha-figuras-gen desenha-sierpinski TRI1 Muito-pequena? Less-fig)
+;; Este programa sempre termina porque:
+;; (a) Existe um caso base (sem recursão) que é quando o tamanho do lado é menor ou igual a 5.
+;;    Neste caso, o programa simplesmente desenha a figura com este lado.
+;; (b) Cada chamada recursiva é realizada tendo como argumento a função Less-fig que
+;;     reduz em 15 unidades o tamanho do lado da figura, dessa forma a cada chamada fica mais
+;;    próximo de se tornar menor que 5 de lado (lembrando que a chamada recursiva só ocorre se o lado for >= 5).
+;; (c) As funções boolean=?, place-image e cond terminam, pois são pré-definidas da linguagem.
+;;     A função desenha-sierpinskia termina, pois a função Less-fig termina e não tem laços.
+
+;;(desenha-figuras-gen desenha-sierpinski-carpet TAPETE fora-de-cena? Move-R)
+;; Este programa sempre termina porque:
+;; (a) Existe um caso base (sem recursão) que é quando a figura está fora dos limites da cena,
+;;     sendo esse quando as cordenadas x ou y da figura ficam fora de 0 e 400 na largura ou altura,
+;;     Neste caso, o programa simplesmente desenha a cena.
+;; (b) Cada chamada recursiva é realizada tendo como argumento a função Move-R que
+;;     adiciona 10 unidades na coordena x da figura, dessa forma a cada chamada fica mais próximo
+;;     de a figura passar do limite da cena (lembrando que a chamada
+;;     recursiva só ocorre se a figura estiver dentro do espaço da largura e altura da cena).
+;; (c) As funções boolean=?, place-image e cond terminam, pois são pré-definidas da linguagem.
+;;     A função desenha-sierpinski-carpet termina, pois a função Move-R termina e não tem laços.
+
+;;(desenha-figuras-gen desenha-sierpinski-carpet TAPETE fora-de-cena? Move-fig)
+;; Este programa sempre termina porque:
+;; (a) Existe um caso base (sem recursão) que é quando a figura está fora dos limites da cena,
+;;     sendo esse quando as cordenadas x ou y da figura ficam fora de 0 e 400 na largura ou altura,
+;;     Neste caso, o programa simplesmente desenha a cena.
+;; (b) Cada chamada recursiva é realizada tendo como argumento a função Move-R que
+;;     adiciona 20 unidades na coordena x e 60 unidades na coordenada y da figura, dessa forma a cada
+;;     chamada fica mais próximo de a figura passar do limite da cena (lembrando que a chamada
+;;     recursiva só ocorre se a figura estiver dentro do espaço da largura e altura da cena).
+;; (c) As funções boolean=?, place-image e cond terminam, pois são pré-definidas da linguagem.
+;;     A função desenha-sierpinski-carpet termina, pois a função  Move-fig termina e não tem laços.
