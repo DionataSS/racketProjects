@@ -1,0 +1,118 @@
+; Dionata Silva da Silveira
+
+
+;======================== BOLA-BRANCA ============================
+
+(define BOLA-BRANCA (circle 105 "outline" "black"))
+                
+
+;======================== BOLA 8 =================================
+  
+(define BOLA8 (overlay
+               (text 
+                (number->string 8) 80 "black")
+                 (circle 50 "solid" "white")
+                  (circle 100 "solid" "black")))
+
+
+;======================== DESENHA-BOLA ===========================
+
+
+(define (DESENHA-BOLA NUM)   
+         (cond
+           [(= 1 NUM) 
+            (overlay
+             (text (number->string NUM) 90 "black")
+              (circle 50 "solid" "white")
+               (circle 100 "solid" "yellow"))]
+
+           [(= 9 NUM) 
+            (overlay
+             (text (number->string NUM) 80 "white")
+              (circle 50 "solid" "black")
+               (circle 100 "solid" "yellow"))]
+
+           [(= 2 NUM) 
+            (overlay
+             (text (number->string NUM) 90 "black")
+              (circle 50 "solid" "white")
+               (circle 100 "solid" "blue"))]
+
+           [(= 10 NUM) 
+            (overlay
+             (text (number->string NUM) 80 "white")
+              (circle 50 "solid" "black")
+               (circle 100 "solid" "blue"))]
+
+           [(= 3 NUM) 
+            (overlay
+             (text (number->string NUM) 90 "black")
+              (circle 50 "solid" "white")
+               (circle 100 "solid" "red"))]
+
+           [(= 11 NUM) 
+            (overlay
+             (text (number->string NUM) 80 "white")
+              (circle 50 "solid" "black")
+               (circle 100 "solid" "red"))]
+
+           [(= 4 NUM) 
+            (overlay
+             (text (number->string NUM) 90 "black")
+              (circle 50 "solid" "white")
+               (circle 100 "solid" "purple"))]
+
+           [(= 12 NUM) 
+            (overlay
+             (text (number->string NUM) 80 "white")
+              (circle 50 "solid" "black")
+               (circle 100 "solid" "purple"))]
+
+           [(= 5 NUM) 
+            (overlay
+             (text (number->string NUM) 90 "black")
+              (circle 50 "solid" "white")
+               (circle 100 "solid" "orange"))]
+
+           [(= 13 NUM) 
+            (overlay
+             (text (number->string NUM) 80 "white")
+              (circle 50 "solid" "black")
+               (circle 100 "solid" "orange"))]
+
+           [(= 6 NUM) 
+            (overlay
+             (text (number->string NUM) 90 "black")
+              (circle 50 "solid" "white")
+               (circle 100 "solid" "green"))]
+
+           [(= 14 NUM) 
+            (overlay
+             (text (number->string NUM) 80 "white")
+              (circle 50 "solid" "black")
+               (circle 100 "solid" "green"))]
+
+           [(= 7 NUM) 
+            (overlay
+             (text (number->string NUM) 90 "black")
+              (circle 50 "solid" "white")
+               (circle 100 "solid" "brown"))]
+
+           [(= 15 NUM) 
+            (overlay
+             (text (number->string NUM) 80 "white")
+              (circle 50 "solid" "black")
+               (circle 100 "solid" "brown"))]))
+
+
+;======================== DESENHA-BOLAS ===========================
+
+(define MENORES (list 1 2 3 4 5 6 7))
+(define MAIORES (list 9 10 11 12 13 14 15))
+
+(define (DESENHA-BOLAS lista)
+  (cond
+     [(empty? lista) empty-image]
+     [else (beside
+           (DESENHA-BOLA (first lista))
+           (DESENHA-BOLAS (rest lista)))])) 
