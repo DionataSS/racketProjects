@@ -1,0 +1,192 @@
+;;===============================================================
+;; 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+;;===============================================================
+;; ==> seleciona-cor
+;; seleciona-cor: numero -> string
+;; Dado um número, devolve uma cor de acordo com o número.
+;; Exemplos:
+;; (seleciona-cor 40) = orange
+;; (seleciona-cor  50) = red
+;; (seleciona-cor  300) = red
+
+(define (seleciona-cor  NUM) ;aqui define que "seleciona-cor" irá depender do "num"
+ (cond ;condição
+   [(< NUM 50) "orange"] ;se o "num" for menor que 50, devolve a cor laranja
+   [(>= NUM 50) "red"])) ;se o "num" or igual ou maior que 50, devolve a cor vermelha
+
+;; Testes:
+   (check-expect (seleciona-cor  5) "orange")
+   (check-expect (seleciona-cor  50) "red")
+   (check-expect (seleciona-cor  600) "red")
+
+
+;;===============================================================
+;; 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+;;===============================================================
+;; ==> desenha-barra 
+;; desenha-barra: numero -> imagem
+;; Dado um número, devolve uma barra com o número e a cor equivalente
+;; Exemplos:
+;; (desenha-barra  20) = mostra uma barra laranja do tamanho 20
+;; (desenha-barra  50) = mostra uma barra vermelha do tamanho 50
+
+(define (desenha-barra n) ;desenha barra de acordo com a variável
+         (overlay 
+          (text (number->string n) 15 "black") ;transforma número em string
+           (rectangle n 30 "solid" (seleciona-cor n)))) ;desenha barra com a cor referente à variável
+
+
+;;===============================================================
+;; 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+;;===============================================================
+;; ==> calcula-proporcao
+;; calcula-proporcao: numero numero -> numero
+;; Dados dois números, calcula a proporção do primeiro em cima do segundo se não for zero
+;; Exemplos:
+;; (calcula-proporcao 25 50) = 50
+;; (calcula-proporcao 150 200) = 75
+;; (calcula-proporcao 50 49) = -1
+
+(define (calcula-proporcao n1 n2) ;calcula proporção entre dois números
+         (cond [(= n1 0) -1] ;se o n1 for igual a zero, devolver -1
+               [(= n2 0) -1] ;se o n2 for igual a zero, devolver -1
+               [else (round(/(* n1 100)n2))])) ;se nenhum número for 0, devolve a proporção do n1 quanto ao n2
+
+
+;;===============================================================
+;; 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
+;;===============================================================
+;; ==> visualiza-resultados
+;; visualiza-resultados: string string numero numero -> imagem
+;; Dados dois nomes de grupos e o número total de membros de cada grupo, se um grupo tiver 0 membros ou os grupos tiverem o mesmo nome, mostra uma barra com o número 100 na cor vermelha, abaixo, os nomes dos grupos e o tamanho da amostra. Se não, mostra uma barra com o tamanho de acordo com o percentual, sendo que vermelha para o número maior e laranja para o menor, abaixo, os nomes dos grupos e o tamanho da amostra.
+;; Exemplos:
+;; (visualiza-resultados "A" "B" 0 60) = mostra o retângulo vermelho com o número 100, o nome dos grupos e o tamanho da amostra
+;; (visualiza-resultados "A" "A" 30 60) = mostra o retângulo vermelho com o número 100, o mesmo nome de grupo e o tamanho da amostra
+;; (visualiza-resultados "A" "B" 300 60) = mostra um retângulo vermelho de tamanho proporcional com o                  número dentro do grupo com mais integrantes, um retângulo laranja proporcional ao grupo com menor número de integrantes com o numero dentro, os nomes dos grupos, o maior vermelho e o menor laranja e abaixo o tamanho da amostra
+
+(define (visualiza-resultados GP1 GP2 NUM1 NUM2) ;função irá depender de 2 strings e 2 números
+ (cond ;condição
+  [(string=? GP1 GP2) (above ;se os grupos tiverem o mesmo nome
+                       (desenha-barra 100) ;desenha barra vermelha com número 100
+                        (text GP1 15 "red") ;nome do grupo
+                         (beside
+                          (text "Tamanho da amostra:" 15 "black") ;ao lado, tamanho da amostra
+                           (text (number->string (+ NUM1 NUM2)) 15 "black")))] ;soma dos grupos
+ 
+  [(= NUM1 0) (above ;se o grupo 1 tiver 0 integrantes, será quase a mesma função anterior
+               (desenha-barra 100)
+                (text GP1 15 "red") ;porém mostra os nomes dos dois grupos, vermelho e laranja
+                 (text GP2 15 "orange")
+                  (beside(text "Tamanho da amostra:" 15 "black")
+                          (text (number->string (+ NUM1 NUM2)) 15 "black")))]
+  
+  [(= NUM2 0) (above ;mesma condição de cima porém o grupo 2
+               (desenha-barra 100)
+                (text GP1 15 "red")
+                 (text GP2 15 "orange")
+                  (beside(text "Tamanho da amostra:" 15 "black")
+                          (text (number->string (+ NUM1 NUM2)) 15 "black")))]
+  
+  [else (above ;se não, mostra duas barras com número e tamanho proporcional a porcentagem
+         (beside
+          (overlay
+           (text (number->string (round(/(* NUM1 100)(+ NUM1 NUM2)))) 15 "black")
+                   (rectangle (round(/(* NUM1 100)(+ NUM1 NUM2))) 30 "solid" "red"))
+          (overlay ;abaixo os nomes dos grupos, vermelho para o maior e laranja o menor
+           (text (number->string (round(/(* NUM2 100)(+ NUM1 NUM2)))) 15 "black")
+                   (rectangle (round(/(* NUM2 100)(+ NUM1 NUM2))) 30 "solid" "orange")))
+                    (text GP1 15 "red")
+                     (text GP2 15 "orange")
+                      (beside ;e o tamanho da amostra que é a soma dos grupos
+                       (text "Tamanho da amostra:" 15 "black")
+                        (text (number->string (+ NUM1 NUM2)) 15 "black")))]))
+
+
+;;===============================================================
+;; 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
+;;===============================================================
+;; ==> traduz-cor
+;; traduz-cor: string -> string
+;; Dado o nome de uma cor em português, devolve o nome em inglês
+;; Exemplos:
+;; (traduz-cor amarela)= yellow
+;; (traduz-cor azul)= blue
+
+(define (traduz-cor COR) ;função depende da variável que será uma string
+         (cond ;condição
+          [(string=? COR "amarela") "yellow"] ;se a variável tiver o nome amarela, devolve yellow
+          [(string=? COR "verde") "green"] ;se a variável tiver o nome verde, devolve green
+          [(string=? COR "vermelha") "red"] ;se a variável tiver o nome vermelha, devolve red
+          [(string=? COR "azul") "blue"] ;se a variável tiver o nome azul, devolve blue
+          [(string=? COR "preta") "black"])) ;se a variável tiver o nome preta, devolve black
+
+
+;;===============================================================
+;; 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 
+;;===============================================================
+;; (a) 
+ 
+ (define PULA_VEZ 11) ;define PULA_VEZ como número 11
+ (define COMPRA2 12) ;define COMPRA2 como número 12
+ (define INVERTE 13) ;define INVERTE como número 13
+ (define CURINGA 14) ;define CURINGA como número 14
+ (define CURINGA_COMPRA4 15) ;define CURINGA_COMPRA4 como número 15
+
+;;===============================================================
+;; (b) 
+;; ==> desenha-carta
+;; desenha-carta: numero string -> imagem
+;; Dados um número e uma cor, devolve uma imagem da carta com o número e cor respectivos
+;; Exemplos:
+;; (desenha-carta 5 "azul") = desenha uma carta com 5 da cor azul
+;; (desenha-carta 7 "amarela") = desenha uma carta com o número 7 da cor amarela
+
+(define (desenha-carta NUMBER COLOR) ;função depende de um número e uma variável
+  
+  (overlay
+   (text (number->string NUMBER) 90 "black") ;mostra o número escolhido em cima da carta da cor desejada
+   (circle 50 "solid" "white") 
+   (rectangle 117 180 "solid" (traduz-cor COLOR))))
+
+;;===============================================================  
+;; (c)
+;;==> jogada-valida?
+;; jogada-valida?: número string número string -> string
+;; Dado um número, que repesenta a carta, e a cor da carta uno que tem na mão; e o número, que repesenta a carta, e a cor da carta uno que tem na mesa, verifica se é possível ou não jogar a carta da mão.
+;;Exemplo: 
+;;(jogada-valida? 13 "preta" 3 "azul" )= "É possível jogar essa carta!"
+;;(jogada-valida? 1 "azul" 2 "amarela")= "Não é possível jogar essa carta!"
+
+(define (jogada-valida? num1 cor1 num2 cor2)
+       (cond
+         [(= num1 num2) "É possível jogar essa carta"] ;se os números forem iguais, mostra que é possível jogar
+          [(string=? cor1 cor2) "É possível jogar essa carta"] ;se as cores forem iguais, mostra que é possível
+           [(and (= num1 13)(= num1 14)(string=? cor1 "preta")) "É possível jogar essa carta"] ;se num1 for 13 ou 14 e a cor preta mostra que é possível jogar
+            [(and (= num2 13)(= num2 14)(string=? cor2 "preta")) "É possível jogar essa carta"] ;se num2 for 13 ou 14 e cor preta mostra que é possível jogar
+             [(and (= num1 10)(= num1 11)(= num1 12)(string=? cor1 cor2)) "É possível jogar essa carta"] ;se num1 for o 10, o 11 ou o 12 mostra que é possível jogar
+              [(and (= num2 10)(= num2 11)(= num2 12)(string=? cor1 cor2)) "É possível jogar essa carta"] ;se num2 for o 10, o 11 ou o 12 mostra que é possível jogar
+        [else "Não é possível jogar essa carta"]))
+
+
+;;===============================================================  
+;; (d)
+;;  ==> mostra-jogada
+;; mostra-jogada: número string número string -> imagem
+;; Dados um número e uma cor que representa a mão e um número e uma cor que representa a mesa, mostra as cartas e se a jogada é possível
+;; Exemplos: 
+;; (mostra-jogada 13 "preta" 3 "azul" )= desenha carta CURINGA na mão e a carta 3 azul na mesa, informa "É possível jogar essa carta!"
+;; (jogada-válida 1 "azul" 2 "amarela")= desenha carta 1 azul na mão e a carta 2 amarela na mesa, e informar "Não é possível jogar essa carta!"
+
+
+(define (mostra-jogada num1 cor1 num2 cor2) ;função depende de dois números e duas cores
+         (beside
+          (above
+           (text "Carta da mão:" 15 "black") ;texto carta da mão
+            (desenha-carta num1 cor1)) ;desenho da carta
+             (text " " 40 "white")
+              (beside
+               (above
+                (text "Carta da mesa:" 15 "black") ;texto carta da mão
+                 (desenha-carta num2 cor2)) 
+                  (rectangle 20 200 "solid" "white")
+                   (text (jogada-valida? num1 cor1 num2 cor2) 15 "black"))))
