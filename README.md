@@ -1,5 +1,5 @@
 # racketProjects
-some codes and assessments I developed at university
+
 
 link First Test:
 https://www.wescheme.org/view?publicId=nzpe255uhW
